@@ -1,11 +1,5 @@
 module.exports = {
-  purge: {
-    mode: 'all',
-    content: [
-      './src/**/*.html',
-      './dist/**/*.php',
-    ],
-  },
+  purge: false,
   theme: {},
   variants: {},
   plugins: [],

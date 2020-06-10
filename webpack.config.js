@@ -32,11 +32,7 @@ module.exports = {
     ]
   },
   plugins: [
-    new MiniCssExtractPlugin({
-      filename: process.env.NODE_ENV === 'production'
-        ? '[name].[contenthash].css'
-        : '[name].css',
-    }),
+    new MiniCssExtractPlugin(),
     new CleanWebpackPlugin({
       cleanAfterEveryBuildPatterns: ['style.js'],
       cleanOnceBeforeBuildPatterns: ['**/*', '!index.php'],

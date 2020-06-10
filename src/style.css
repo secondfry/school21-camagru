@@ -1,9 +1,23 @@
-@tailwind base;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
-@tailwind components;
+.sf-link_dark_hover {
+  @apply text-white;
+}
 
-@tailwind utilities;
+.sf-link_dark {
+  @apply text-gray-400;
 
-.button {
-  font-weight: 700;
+  &:hover {
+    @apply sf-link_dark_hover;
+  }
+}
+
+.sf-button-header {
+  @apply bg-gray-800 p-3 sf-link_dark;
+
+  &:hover {
+    @apply bg-gray-700 text-white sf-link_dark_hover;
+  }
 }
