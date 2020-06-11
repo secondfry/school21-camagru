@@ -23,7 +23,7 @@ CREATE TABLE `users` (
   `username` text NOT NULL,
   `password` text NOT NULL,
   `confirmed` int(1) NOT NULL DEFAULT '0',
-  `notification` int(1) NOT NULL DEFAULT '0'
+  `notification` int(1) NOT NULL DEFAULT '1'
 );
 
 /*Table structure for table `confirmations` */

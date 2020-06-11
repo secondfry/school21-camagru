@@ -12,9 +12,12 @@
         <a href="/" class="sf-button-header">oadhesiv's Camagru</a>
       </div>
       <div class="flex ml-auto">
-        <a href="/" class="sf-button-header">Login</a>
+        <?php display_login_logout(); ?>
       </div>
     </div>
+  </div>
+  <div class="container mx-auto">
+    <?php display_notification(); ?>
   </div>
   <div id="main" class="flex-1">
     <div class="container mx-auto p-3">

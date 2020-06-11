@@ -7,6 +7,7 @@ module.exports = {
       // Specify the paths to all of the template files in your project
       content: [
         './views/**/*.php',
+        './engine/**/*.php',
       ],
 
       // This is the function used to extract class names from your templates

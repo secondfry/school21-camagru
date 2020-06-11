@@ -23,7 +23,7 @@ CREATE TABLE `users` (
   `username` text NOT NULL,
   `password` text NOT NULL,
   `confirmed` int(1) unsigned NOT NULL DEFAULT '0',
-  `notification` int(1) unsigned NOT NULL DEFAULT '0',
+  `notification` int(1) unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

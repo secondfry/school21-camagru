@@ -136,7 +136,8 @@ $RECYCLE.BIN/
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*
@@ -155,3 +156,4 @@ Temporary Items
 
 ### Personal ###
 dist/css/*.css
+config/database.sq3

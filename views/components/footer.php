@@ -6,7 +6,7 @@
         <span>&copy; 2020, Rustam @SecondFry Gubaydullin</span>
       </div>
       <div class="mt-3 md:ml-auto md:mt-auto">
-        <a href="/" class="sf-link_dark">GitHub</a>
+        <a href="https://github.com/secondfry/" class="sf-link_dark">GitHub</a>
       </div>
     </div>
   </div>
