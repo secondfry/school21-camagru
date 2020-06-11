@@ -5,11 +5,10 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
-  entry: {
-    style: "./src/style.pcss",
-  },
+  devtool: process.env.NODE_ENV === 'production' ? null : 'eval-cheap-source-map',
+  entry: "./src/app.js",
   output: {
-    path: path.join(__dirname, './dist/css/'),
+    path: path.join(__dirname, './dist/bundle'),
   },
   module: {
     rules: [
@@ -32,7 +31,9 @@ module.exports = {
     ]
   },
   plugins: [
-    new MiniCssExtractPlugin(),
+    new MiniCssExtractPlugin({
+      filename: '[name].css'
+    }),
     new CleanWebpackPlugin({
       cleanAfterEveryBuildPatterns: ['style.js'],
       cleanOnceBeforeBuildPatterns: ['**/*', '!index.php'],

@@ -10,5 +10,6 @@
       </div>
     </div>
   </div>
+<script src="/bundle/main.js"></script>
 </body>
 </html>

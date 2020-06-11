@@ -57,6 +57,18 @@ function display_login_logout() {
   }
 }
 
+function display_app() {
+  $id = $_SESSION['user']['id'] ?? 0;
+
+  if (!$id) {
+    return;
+  }
+
+  ?>
+  <a href="/?action=view&page=create" class="sf-button-header">Create</a>
+  <?php
+}
+
 function save_history() {
   $_SESSION['page'] = $_SERVER['REQUEST_URI'];
 }

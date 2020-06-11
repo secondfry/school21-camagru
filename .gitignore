@@ -155,5 +155,5 @@ Temporary Items
 
 
 ### Personal ###
-dist/css/*.css
+dist/bundle/*
 config/database.sq3

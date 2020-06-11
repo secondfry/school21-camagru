@@ -27,6 +27,7 @@ switch($action) {
     switch ($page) {
       case 'register':
       case 'login':
+      case 'create':
         require_once __DIR__ . '/../views/pages/' . $page . '.php';
         return;
       default:
