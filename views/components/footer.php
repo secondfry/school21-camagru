@@ -1,11 +1,11 @@
     </div>
   </div>
   <div id="footer" class="bg-gray-800 text-gray-400">
-    <div class="container mx-auto p-3 flex">
+    <div class="container mx-auto p-3 flex flex-col md:flex-row">
       <div>
         <span>&copy; 2020, Rustam @SecondFry Gubaydullin</span>
       </div>
-      <div class="ml-auto">
+      <div class="mt-3 md:ml-auto md:mt-auto">
         <a href="/" class="sf-link_dark">GitHub</a>
       </div>
     </div>
