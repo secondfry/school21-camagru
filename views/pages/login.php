@@ -6,10 +6,10 @@ require_once __DIR__ . '/../components/header.php';
 <h1 class="text-2xl">Login</h1>
 <form method="post" action="/?action=login" class="bg-white rounded">
   <div class="mb-4 flex flex-col md:flex-row md:flex md:items-center">
-    <label class="font-bold block md:mr-3 md:w-1/5" for="email">
-      Email
+    <label class="font-bold block md:mr-3 md:w-1/5" for="username">
+      Username
     </label>
-    <input class="sf-input" id="email" name="email" type="text" placeholder="Email">
+    <input class="sf-input" id="username" name="name" type="text" placeholder="Username">
   </div>
   <div class="mb-4 flex flex-col md:flex-row md:flex md:items-center">
     <label class="font-bold block md:mr-3 md:w-1/5" for="password">

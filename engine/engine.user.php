@@ -75,12 +75,12 @@ function user_register() {
 }
 
 function user_login() {
-  $email = $_POST['email'] ?? null;
+  $name = $_POST['name'] ?? null;
   $pass = $_POST['passwd'] ?? null;
 
-  if (!$email) {
+  if (!$name) {
     $_SESSION['notification'][] = [
-      'text' => 'Вы не указали электронную почту для входа!',
+      'text' => 'Вы не указали имя пользователя для входа!',
       'type' => 'bad',
     ];
   }
@@ -92,11 +92,11 @@ function user_login() {
     ];
   }
 
-  if (!$email || !$pass) {
+  if (!$name || !$pass) {
     ft_reset_to('/?action=view&page=login');
   }
 
-  $stmt = DB::get()->prepare('SELECT `id`, `username`, `email`, `password` FROM `users` WHERE `email` = ?');
+  $stmt = DB::get()->prepare('SELECT `id`, `username`, `email`, `password` FROM `users` WHERE `username` = ?');
   if (!$stmt) {
     $_SESSION['notification'][] = [
       'text' => 'Ошибка MySQL.',
@@ -105,7 +105,7 @@ function user_login() {
     ft_reset();
   }
 
-  $stmt->bindValue(1, $email, PDO::PARAM_STR);
+  $stmt->bindValue(1, $name, PDO::PARAM_STR);
   $res = $stmt->execute();
   $row = $stmt->fetch(PDO::FETCH_ASSOC);
   $id_db = $row['id'];
