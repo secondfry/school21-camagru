@@ -1,42 +1,31 @@
 (() => {
-  // The width and height of the captured photo. We will set the
-  // width to the value defined here, but the height will be
-  // calculated based on the aspect ratio of the input stream.
-
-  const width = 320;    // We will scale the photo width to this
-  let height = 0;     // This will be computed based on the input stream
-
-  // |streaming| indicates whether or not we're currently streaming
-  // video from the camera. Obviously, we start at false.
-
+  const width = 1280;
+  let height = 0;
   let streaming = false;
-
-  // The various HTML elements we need to configure or control.
-
-  const video = document.getElementById('video');
-  const canvas = document.getElementById('canvas');
+  const video = document.getElementById('sf-video');
+  const canvas = document.getElementById('sf-draw');
   const photo = document.getElementById('photo');
-  const startbutton = document.getElementById('startbutton');
-
-  // Personal
-
+  const startbutton = document.getElementById('sf-capture');
   let error = null;
 
-  function startup() {
-    if (!navigator.mediaDevices) {
-      error = `navigator.mediaDevices is undefined`;
-      clearphoto();
+  function afterPageLoad() {
+    if (!navigator?.mediaDevices) {
+      if (window.isDevelopmentBuild) {
+        console.log('navigator.mediaDevices is undefined');
+      }
+
+      clearPhoto();
       return;
     }
 
     navigator.mediaDevices.getUserMedia({video: true, audio: false})
-      .then(function(stream) {
-        video.srcObject = stream;
-        video.play();
-      })
-      .catch(function(err) {
-        error = err;
-      });
+             .then(function(stream) {
+               video.srcObject = stream;
+               video.play();
+             })
+             .catch(function(err) {
+               error = err;
+             });
 
     video.addEventListener('canplay', function(ev){
       if (streaming) {
@@ -64,13 +53,10 @@
       ev.preventDefault();
     }, false);
 
-    clearphoto();
+    clearPhoto();
   }
 
-  // Fill the photo with an indication that none has been
-  // captured.
-
-  function clearphoto() {
+  function clearPhoto() {
     const context = canvas.getContext('2d');
     context.fillStyle = "#AAA";
     context.fillRect(0, 0, canvas.width, canvas.height);
@@ -87,7 +73,7 @@
 
   function takepicture() {
     if (!width || !height) {
-      clearphoto();
+      clearPhoto();
       return;
     }
 
@@ -100,7 +86,5 @@
     photo.setAttribute('src', data);
   }
 
-  // Set up our event listener to run the startup process
-  // once loading is complete.
-  window.addEventListener('load', startup, false);
+  window.addEventListener('load', afterPageLoad, false);
 })();

@@ -13,6 +13,11 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: 'babel-loader'
+      },
+      {
         test: /\.p?css$/,
         use: [
           {
@@ -31,14 +36,18 @@ module.exports = {
     ]
   },
   plugins: [
-    new MiniCssExtractPlugin({
-      filename: '[name].css'
-    }),
-    new CleanWebpackPlugin({
-      cleanAfterEveryBuildPatterns: ['style.js'],
-      cleanOnceBeforeBuildPatterns: ['**/*', '!index.php'],
-      protectWebpackAssets: false,
-    }),
+    new MiniCssExtractPlugin(
+      {
+        filename: '[name].css'
+      }
+    ),
+    new CleanWebpackPlugin(
+      {
+        cleanAfterEveryBuildPatterns: ['style.js'],
+        cleanOnceBeforeBuildPatterns: ['**/*', '!index.php'],
+        protectWebpackAssets: false,
+      }
+    ),
   ],
   watch: !Boolean(process.env.NODE_ENV === 'production'),
-}
+};

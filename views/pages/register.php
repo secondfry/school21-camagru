@@ -9,7 +9,7 @@ require_once __DIR__ . '/../components/header.php';
     <label class="font-bold block md:mr-3 md:w-1/5" for="email">
       Email
     </label>
-    <input class="sf-input" id="email" name="email" type="text" placeholder="Email">
+    <input class="sf-input" id="email" name="email" type="email" placeholder="Email">
   </div>
   <div class="mb-4 flex flex-col md:flex-row md:flex md:items-center">
     <label class="font-bold block md:mr-3 md:w-1/5" for="username">
