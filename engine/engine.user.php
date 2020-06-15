@@ -1,36 +1,30 @@
 <?php
 
+require_once __DIR__ . '/engine.user.name.php';
+require_once __DIR__ . '/engine.user.email.php';
+require_once __DIR__ . '/engine.user.password.php';
+
 function user_register() {
   $name = $_POST['name'] ?? null;
   $email = $_POST['email'] ?? null;
   $pass = $_POST['passwd'] ?? null;
 
-  if (!$name) {
-    $_SESSION['notification'][] = [
-      'text' => 'Вы не указали имя при регистрации!',
-      'type' => 'bad',
-    ];
+  $res = 0;
+  if (!check_name($name)) {
+    $res += 1;
+  }
+  if (!check_email($email)) {
+    $res += 1;
+  }
+  if (!check_password($pass)) {
+    $res += 1;
   }
 
-  if (!$email) {
-    $_SESSION['notification'][] = [
-      'text' => 'Вы не указали электронную почту при регистрации!',
-      'type' => 'bad',
-    ];
-  }
-
-  if (!$pass) {
-    $_SESSION['notification'][] = [
-      'text' => 'Вы не указали пароль при регистрации!',
-      'type' => 'bad',
-    ];
-  }
-
-  if (!$name || !$email || !$pass) {
+  if ($res !== 0) {
     ft_reset_to('/?action=view&page=register');
   }
 
-  $stmt = DB::get()->prepare('SELECT `id` FROM `users` WHERE `email` = ?');
+  $stmt = DB::get()->prepare('SELECT `id`, `username`, `email` FROM `users` WHERE `email` = ? OR `username` = ?');
   if (!$stmt) {
     $_SESSION['notification'][] = [
       'text' => 'Ошибка SQL.',
@@ -40,12 +34,31 @@ function user_register() {
   }
 
   $stmt->bindValue(1, $email, PDO::PARAM_STR);
+  $stmt->bindValue(2, $name, PDO::PARAM_STR);
   $res = $stmt->execute();
-  if ($stmt->fetch()) {
-    $_SESSION['notification'][] = [
-      'text' => 'Пользователь с таким адресом электронной почты уже зарегистрирован!',
-      'type' => 'bad',
-    ];
+  $errorFlag = false;
+  while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $errorFlag = true;
+
+    $name_db = $row['username'];
+    $email_db = $row['email'];
+
+    if ($name_db === $name) {
+      $_SESSION['notification'][] = [
+        'text' => 'Пользователь с таким именем уже зарегистрирован!',
+        'type' => 'bad',
+      ];
+    }
+
+    if ($email_db === $email) {
+      $_SESSION['notification'][] = [
+        'text' => 'Пользователь с таким адресом электронной почты уже зарегистрирован!',
+        'type' => 'bad',
+      ];
+    }
+  }
+
+  if ($errorFlag) {
     $stmt->closeCursor();
     ft_reset();
   }

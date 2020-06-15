@@ -1,29 +1,27 @@
 module.exports = {
   plugins: {
     'postcss-import': {},
-    'tailwindcss': {},
+    tailwindcss: {},
     'postcss-nested': {},
     '@fullhuman/postcss-purgecss': {
       // Specify the paths to all of the template files in your project
-      content: [
-        './views/**/*.php',
-        './engine/**/*.php',
-      ],
+      content: ['./views/**/*.php', './engine/**/*.php'],
 
       // This is the function used to extract class names from your templates
-      defaultExtractor: content => {
+      defaultExtractor: (content) => {
         // Capture as liberally as possible, including things like `h-(screen-1.5)`
-        const broadMatches = content.match(/[^<>"'`\s]*[^<>"'`\s:]/g) || []
+        const broadMatches = content.match(/[^<>"'`\s]*[^<>"'`\s:]/g) || [];
 
         // Capture classes within other delimiters like .block(class="w-1/2") in Pug
-        const innerMatches = content.match(/[^<>"'`\s.()]*[^<>"'`\s.():]/g) || []
+        const innerMatches =
+          content.match(/[^<>"'`\s.()]*[^<>"'`\s.():]/g) || [];
 
-        return broadMatches.concat(innerMatches)
-      }
+        return broadMatches.concat(innerMatches);
+      },
     },
     'postcss-preset-env': {},
-    'cssnano': {
-      preset: 'default'
+    cssnano: {
+      preset: 'default',
     },
-  }
-}
+  },
+};

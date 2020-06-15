@@ -4,7 +4,7 @@ require_once __DIR__ . '/../components/header.php';
 
 ?>
 <h1 class="text-2xl">Register</h1>
-<form method="post" action="/?action=register" class="bg-white rounded">
+<form method="post" action="/?action=register" class="bg-white rounded" id="register-form">
   <div class="mb-4 flex flex-col md:flex-row md:flex md:items-center">
     <label class="font-bold block md:mr-3 md:w-1/5" for="email">
       Email
@@ -19,7 +19,8 @@ require_once __DIR__ . '/../components/header.php';
   </div>
   <div class="mb-4 flex flex-col md:flex-row md:flex md:items-center">
     <label class="font-bold block md:mr-3 md:w-1/5" for="password">
-      Password
+      Password<br>
+      <span class="font-normal font-smaller">At least 8 symbols. Must have uppercase letter.</span>
     </label>
     <input class="sf-input" id="password" name="passwd" type="password" placeholder="******************">
   </div>

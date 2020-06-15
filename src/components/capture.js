@@ -1,7 +1,8 @@
-(() => {
+export const initPageCapture = () => {
   const width = 1280;
   let height = 0;
   let streaming = false;
+
   const video = document.getElementById('sf-video');
   const canvas = document.getElementById('sf-draw');
   const photo = document.getElementById('photo');
@@ -18,47 +19,56 @@
       return;
     }
 
-    navigator.mediaDevices.getUserMedia({video: true, audio: false})
-             .then(function(stream) {
-               video.srcObject = stream;
-               video.play();
-             })
-             .catch(function(err) {
-               error = err;
-             });
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: false })
+      .then(function (stream) {
+        video.srcObject = stream;
+        video.play();
+      })
+      .catch(function (err) {
+        error = err;
+      });
 
-    video.addEventListener('canplay', function(ev){
-      if (streaming) {
-        return;
-      }
+    video.addEventListener(
+      'canplay',
+      function (ev) {
+        if (streaming) {
+          return;
+        }
 
-      height = video.videoHeight / (video.videoWidth/width);
+        height = video.videoHeight / (video.videoWidth / width);
 
-      // Firefox currently has a bug where the height can't be read from
-      // the video, so we will make assumptions if this happens.
+        // Firefox currently has a bug where the height can't be read from
+        // the video, so we will make assumptions if this happens.
 
-      if (isNaN(height)) {
-        height = width / (4/3);
-      }
+        if (isNaN(height)) {
+          height = width / (4 / 3);
+        }
 
-      video.setAttribute('width', width);
-      video.setAttribute('height', height);
-      canvas.setAttribute('width', width);
-      canvas.setAttribute('height', height);
-      streaming = true;
-    }, false);
+        video.setAttribute('width', width);
+        video.setAttribute('height', height);
+        canvas.setAttribute('width', width);
+        canvas.setAttribute('height', height);
+        streaming = true;
+      },
+      false
+    );
 
-    startbutton.addEventListener('click', function(ev){
-      takepicture();
-      ev.preventDefault();
-    }, false);
+    startbutton.addEventListener(
+      'click',
+      function (ev) {
+        takepicture();
+        ev.preventDefault();
+      },
+      false
+    );
 
     clearPhoto();
   }
 
   function clearPhoto() {
     const context = canvas.getContext('2d');
-    context.fillStyle = "#AAA";
+    context.fillStyle = '#AAA';
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     const data = canvas.toDataURL('image/png');
@@ -87,4 +97,4 @@
   }
 
   window.addEventListener('load', afterPageLoad, false);
-})();
+};

@@ -5,8 +5,9 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
-  devtool: process.env.NODE_ENV === 'production' ? null : 'eval-cheap-source-map',
-  entry: "./src/app.js",
+  devtool:
+    process.env.NODE_ENV === 'production' ? false : 'eval-cheap-source-map',
+  entry: './src/app.js',
   output: {
     path: path.join(__dirname, './dist/bundle'),
   },
@@ -15,7 +16,7 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: 'babel-loader'
+        loader: 'babel-loader',
       },
       {
         test: /\.p?css$/,
@@ -31,23 +32,19 @@ module.exports = {
           },
           'css-loader',
           'postcss-loader',
-        ]
-      }
-    ]
+        ],
+      },
+    ],
   },
   plugins: [
-    new MiniCssExtractPlugin(
-      {
-        filename: '[name].css'
-      }
-    ),
-    new CleanWebpackPlugin(
-      {
-        cleanAfterEveryBuildPatterns: ['style.js'],
-        cleanOnceBeforeBuildPatterns: ['**/*', '!index.php'],
-        protectWebpackAssets: false,
-      }
-    ),
+    new MiniCssExtractPlugin({
+      filename: '[name].css',
+    }),
+    new CleanWebpackPlugin({
+      cleanAfterEveryBuildPatterns: ['style.js'],
+      cleanOnceBeforeBuildPatterns: ['**/*', '!index.php'],
+      protectWebpackAssets: false,
+    }),
   ],
   watch: !Boolean(process.env.NODE_ENV === 'production'),
 };
