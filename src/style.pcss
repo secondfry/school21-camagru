@@ -1,6 +1,12 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@font-face {
+  font-family: 'Userbar';
+  src: url(/font/userbar.woff2) format('woff2'),
+    url(/font/userbar.ttf) format('truetype');
+}
 
 .sf-link_dark_hover {
   @apply text-white;
@@ -70,6 +76,8 @@
 
     width: 100%;
     border: 1px solid #000;
+    max-width: 600px;
+    margin: 0 auto;
   }
 
   .camera-holder {
@@ -80,39 +88,160 @@
     overflow: hidden;
   }
 
-  #sf-video {}
+  #sf-video {
+  }
 
-  #sf-capture {
-    @apply bg-red-700;
-
+  .sf-actions {
     position: absolute;
-    display: block;
-    border-radius: 50%;
-    width: 2rem;
-    height: 2rem;
     right: 0.5rem;
     bottom: 0.5rem;
+    display: grid;
+    grid-gap: 0.5rem;
+    grid-template: 'confirm reset upload capture' / auto auto auto;
+  }
+
+  .sf-action {
+    @apply opacity-25;
+
+    display: block;
+    border-radius: 1rem;
+    width: 2rem;
+    height: 2rem;
+
+    &.hidden {
+      display: none;
+    }
+
+    &.active {
+      @apply opacity-100;
+    }
+  }
+
+  #sf-reset {
+    @apply bg-gray-900;
+
+    font-family: 'Userbar', sans-serif;
+    width: auto;
+    padding: 0 1rem;
+    color: white;
+
+    &.active {
+      @apply bg-green-900;
+    }
+  }
+
+  #sf-confirm {
+    @apply bg-gray-900;
+
+    font-family: 'Userbar', sans-serif;
+    width: auto;
+    padding: 0 1rem;
+    color: white;
+
+    &.active {
+      @apply bg-green-900;
+    }
+  }
+
+  #sf-upload {
+    background: url(/images/upload.svg) center / 50% no-repeat;
+    @apply bg-gray-900;
+
+    &.active {
+      @apply bg-green-900;
+    }
+  }
+
+  #sf-capture {
+    background: url(/images/photo-video.svg) center / 50% no-repeat;
+    @apply bg-gray-900;
+
+    &.active {
+      @apply bg-red-700;
+    }
+  }
+
+  #sf-picture {
+    width: 0;
+    height: 0;
+  }
+
+  #sf-input-file {
+    @apply opacity-0;
+
+    &:hover {
+      @apply cursor-pointer;
+    }
   }
 
   #sf-draw {
-    display: none;
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+.sf-creation-layout {
+  display: grid;
+  grid-template: 'stickers' 'webcam' 'thumbs' / 1fr;
+  grid-gap: 1rem;
+
+  @media (min-width: 768px) {
+    grid-template: 'stickers webcam' 'thumbs' / 200px auto 200px;
+  }
+}
+
+.sf-thumbnails {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-gap: 1rem 0.5rem;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   }
 
-  #photo {
-    border: 1px solid black;
-    box-shadow: 2px 2px 3px black;
-    width:320px;
-    height:180px;
+  .sf-image {
+    display: grid;
+    grid-template: 'image' 'info' / auto;
+    align-content: start;
+    grid-gap: 0.25rem;
+
+    .sf-image-info {
+      display: grid;
+      line-height: 1.5;
+      grid-template: auto / min-content max-content min-content max-content;
+      grid-column-gap: 0.25rem;
+      font-family: Userbar, sans-serif;
+      font-size: 12px;
+      align-items: center;
+
+      .sf-image-icon {
+        display: block;
+        width: 1rem;
+        height: 1rem;
+        margin-left: 0.25rem;
+      }
+
+      .sf-image-likes-icon {
+        background: url(/images/heart.svg) no-repeat center;
+      }
+
+      .sf-image-comments-icon {
+        background: url(/images/comment.svg) no-repeat center;
+      }
+    }
   }
 
-  .output {
-    width: 340px;
-    display:inline-block;
-  }
+  .sf-sticker {
+    border: 1px solid #000;
+    padding: 2px;
 
-  .contentarea {
-    font-size: 16px;
-    font-family: "Lucida Grande", "Arial", sans-serif;
-    width: 760px;
+    .sf-thumbnails & {
+      grid-gap: 0;
+    }
+
+    &.selected {
+      border: 3px solid darkgreen;
+      padding: 0;
+    }
   }
 }

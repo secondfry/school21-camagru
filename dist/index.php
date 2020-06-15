@@ -32,13 +32,20 @@ switch($action) {
   case 'setup':
     require_once __DIR__ . '/../config/' . $action . '.php';
     return;
+  case 'upload':
+    ft_reset_no_auth();
+    image_upload();
+    return;
   case 'view':
     $page = url_get('page', '/^[a-z0-9_]+$/');
     switch ($page) {
+      case 'create':
+        ft_reset_no_auth();
+        require_once __DIR__ . '/../views/pages/' . $page . '.php';
+        return;
       case 'register':
       case 'login':
       case 'recover_step_1':
-      case 'create':
         require_once __DIR__ . '/../views/pages/' . $page . '.php';
         return;
       case 'recover_step_2':

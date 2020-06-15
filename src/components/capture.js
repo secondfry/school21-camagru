@@ -2,98 +2,202 @@ export const initPageCapture = () => {
   const width = 1280;
   let height = 0;
   let streaming = false;
+  let allowed = false;
+  let readyToUpload = false;
 
-  const video = document.getElementById('sf-video');
-  const canvas = document.getElementById('sf-draw');
-  const photo = document.getElementById('photo');
-  const startbutton = document.getElementById('sf-capture');
-  let error = null;
+  const sfVideo = document.getElementById('sf-video');
+  const sfPicture = document.getElementById('sf-picture');
+  const sfDrawIntermediate = document.getElementById('sf-draw-intermediate');
+  const sfDraw = document.getElementById('sf-draw');
+  const sfCapture = document.getElementById('sf-capture');
+  const sfStickers = document.querySelectorAll('.sf-sticker');
+  const sfReset = document.getElementById('sf-reset');
+  const sfConfirm = document.getElementById('sf-confirm');
+  const sfInputFile = document.getElementById('sf-input-file');
 
   function afterPageLoad() {
     if (!navigator?.mediaDevices) {
-      if (window.isDevelopmentBuild) {
-        console.log('navigator.mediaDevices is undefined');
-      }
-
-      clearPhoto();
+      console.mlog('navigator.mediaDevices is undefined');
       return;
     }
 
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: false })
       .then(function (stream) {
-        video.srcObject = stream;
-        video.play();
+        sfVideo.srcObject = stream;
+        sfVideo.play();
       })
-      .catch(function (err) {
-        error = err;
-      });
+      .catch(console.merror.bind(console));
 
-    video.addEventListener(
+    sfVideo.addEventListener(
       'canplay',
-      function (ev) {
+      function (e) {
         if (streaming) {
           return;
         }
 
-        height = video.videoHeight / (video.videoWidth / width);
-
-        // Firefox currently has a bug where the height can't be read from
-        // the video, so we will make assumptions if this happens.
+        height = sfVideo.videoHeight / (sfVideo.videoWidth / width);
 
         if (isNaN(height)) {
-          height = width / (4 / 3);
+          height = width / (16 / 9);
         }
 
-        video.setAttribute('width', width);
-        video.setAttribute('height', height);
-        canvas.setAttribute('width', width);
-        canvas.setAttribute('height', height);
+        sfVideo.setAttribute('width', width);
+        sfVideo.setAttribute('height', height);
+        sfDraw.setAttribute('width', width);
+        sfDraw.setAttribute('height', height);
         streaming = true;
       },
       false
     );
 
-    startbutton.addEventListener(
+    sfCapture.addEventListener(
       'click',
-      function (ev) {
-        takepicture();
-        ev.preventDefault();
+      (e) => {
+        e.preventDefault();
+
+        takePicture(sfVideo);
       },
       false
     );
 
-    clearPhoto();
+    sfStickers.forEach((elem) => {
+      elem.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        elem.classList.toggle('selected');
+
+        renderPicture();
+
+        if (readyToUpload) {
+          return;
+        }
+
+        const selected = document.querySelectorAll('.sf-sticker.selected');
+        if (selected.length > 0) {
+          allowed = true;
+          sfCapture.classList.add('active');
+        } else {
+          allowed = false;
+          sfCapture.classList.remove('active');
+        }
+      });
+    });
+
+    sfPicture.addEventListener('load', () => takePicture(sfPicture));
+
+    sfInputFile.addEventListener('change', e => {
+      if (!sfInputFile.files || !sfInputFile.files[0]) {
+        return;
+      }
+
+      sfPicture.src = URL.createObjectURL(sfInputFile.files[0]);
+    });
+
+    sfReset.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      sfVideo.classList.remove('hidden');
+      sfDraw.classList.add('hidden');
+
+      sfCapture.classList.add('active');
+      sfConfirm.classList.remove('active');
+      sfReset.classList.remove('active');
+
+      readyToUpload = false;
+    });
+
+    sfConfirm.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      if (!readyToUpload) {
+        return;
+      }
+
+      uploadPicture();
+    });
   }
 
-  function clearPhoto() {
-    const context = canvas.getContext('2d');
-    context.fillStyle = '#AAA';
-    context.fillRect(0, 0, canvas.width, canvas.height);
+  function renderPicture() {
+    const context = sfDraw.getContext('2d');
+    sfDraw.width = width;
+    sfDraw.height = height;
+    context.drawImage(sfDrawIntermediate, 0, 0, width, height);
 
-    const data = canvas.toDataURL('image/png');
-    photo.setAttribute('src', data);
+    const orig_ratio = width / height;
+    let final_w;
+    let final_h;
+    let offset_x;
+    let offset_y;
+    if (orig_ratio > 16 / 9) {
+      final_w = (16 * height) / 9;
+      final_h = height;
+      offset_x = (width - final_w) / 2;
+      offset_y = 0;
+    } else {
+      final_w = width;
+      final_h = (9 * width) / 16;
+      offset_x = 0;
+      offset_y = (height - final_h) / 2;
+    }
+    document
+      .querySelectorAll('.sf-sticker.selected img')
+      .forEach((e) =>
+        context.drawImage(e, offset_x, offset_y, final_w, final_h)
+      );
   }
 
-  // Capture a photo by fetching the current contents of the video
-  // and drawing it into a canvas, then converting that to a PNG
-  // format data URL. By drawing it on an offscreen canvas and then
-  // drawing that to the screen, we can change its size and/or apply
-  // other changes before drawing it.
-
-  function takepicture() {
+  function takePicture(parentElem) {
     if (!width || !height) {
-      clearPhoto();
       return;
     }
 
-    const context = canvas.getContext('2d');
-    canvas.width = width;
-    canvas.height = height;
-    context.drawImage(video, 0, 0, width, height);
+    if (parentElem === sfVideo && !sfCapture.classList.contains('active')) {
+      return;
+    }
 
-    const data = canvas.toDataURL('image/png');
-    photo.setAttribute('src', data);
+    const contextIntermediate = sfDrawIntermediate.getContext('2d');
+    sfDrawIntermediate.width = width;
+    sfDrawIntermediate.height = height;
+    contextIntermediate.drawImage(parentElem, 0, 0, width, height);
+
+    renderPicture();
+
+    sfVideo.classList.add('hidden');
+    sfDraw.classList.remove('hidden');
+
+    sfCapture.classList.remove('active');
+    sfConfirm.classList.add('active');
+    sfReset.classList.add('active');
+
+    readyToUpload = true;
+  }
+
+  function uploadPicture() {
+    const data = sfDraw.toDataURL('image/jpeg', 0.8);
+    const selectedIDs = [].map.call(
+      document.querySelectorAll('.sf-sticker.selected'),
+      (e) => e.dataset['id']
+    );
+
+    fetch('/?action=upload', {
+      method: 'POST',
+      body: JSON.stringify({
+        data,
+        stickers: selectedIDs,
+      }),
+    })
+      .then((res) => {
+        if (res.status === 413) {
+          alert('Selected image size is too big!');
+        }
+        res
+          .text()
+          .then(console.mlog.bind(console))
+          .catch(console.merror.bind(console));
+        document.location.href = document.location.href;
+      })
+      .catch(console.merror.bind(console));
   }
 
   window.addEventListener('load', afterPageLoad, false);

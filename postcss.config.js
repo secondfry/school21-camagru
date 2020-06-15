@@ -5,7 +5,7 @@ module.exports = {
     'postcss-nested': {},
     '@fullhuman/postcss-purgecss': {
       // Specify the paths to all of the template files in your project
-      content: ['./views/**/*.php', './engine/**/*.php'],
+      content: ['./views/**/*.php', './engine/**/*.php', './src/**/*.js'],
 
       // This is the function used to extract class names from your templates
       defaultExtractor: (content) => {

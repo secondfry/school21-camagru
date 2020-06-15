@@ -72,3 +72,15 @@ function display_app() {
 function save_history() {
   $_SESSION['page'] = $_SERVER['REQUEST_URI'];
 }
+
+function user_logon() {
+  return $_SESSION['user']['id'] !== 0;
+}
+
+function ft_reset_no_auth() {
+  if (user_logon()) {
+    return;
+  }
+
+  ft_reset();
+}
