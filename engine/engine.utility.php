@@ -22,7 +22,7 @@ function ft_reset_to($page) {
     return;
   }
 
-  header('Location: ' . $page);
+//  header('Location: ' . $page);
   exit;
 }
 

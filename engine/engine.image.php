@@ -114,7 +114,7 @@ LEFT JOIN `image_likes` `il` ON `images`.`id` = `il`.`image_id`
 LEFT JOIN `image_comments` `ic` ON `images`.`id` = `ic`.`image_id`
 GROUP BY `images`.`id`
 ORDER BY `created` DESC
-LIMIT ?,100'
+LIMIT ?,16'
   );
   if (!$stmt) {
     $_SESSION['notification'][] = [
@@ -210,6 +210,7 @@ LIMIT 16'
 }
 
 function display_query_thumbnails(PDOStatement $stmt) {
+  $i = 0;
   ?>
   <div class="sf-thumbnails">
     <?php
@@ -225,10 +226,12 @@ function display_query_thumbnails(PDOStatement $stmt) {
         </div>
       </div>
       <?php
+      $i += 1;
     }
     ?>
   </div>
   <?php
+  return $i;
 }
 
 function display_user_image_thumbnails(int $id) {

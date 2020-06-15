@@ -46,6 +46,7 @@ switch($action) {
       case 'register':
       case 'login':
       case 'recover_step_1':
+      case 'index':
         require_once __DIR__ . '/../views/pages/' . $page . '.php';
         return;
       case 'recover_step_2':
