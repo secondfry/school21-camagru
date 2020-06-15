@@ -97,9 +97,11 @@ function get_all_images(int $page) {
     '
 SELECT `images`.*,
        COUNT(`il`.`id`) AS `likes`,
-       COUNT(`ic`.`id`) AS `comments`
+       COUNT(`ic`.`id`) AS `comments`,
+       CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`
 FROM `images`
 LEFT JOIN `image_likes` `il` ON `images`.`id` = `il`.`image_id`
+LEFT JOIN `image_likes` `ilm` ON `images`.`id` = `ilm`.`image_id`
 LEFT JOIN `image_comments` `ic` ON `images`.`id` = `ic`.`image_id`
 GROUP BY `images`.`id`
 ORDER BY `created` DESC
@@ -112,13 +114,14 @@ LIMIT ?,16'
     ];
     ft_reset();
   }
-  $stmt->bindValue(1, $page * 16, PDO::PARAM_INT);
+  $stmt->bindValue(1, $_SESSION['user']['id'] ?? 0, PDO::PARAM_INT);
+  $stmt->bindValue(2, $page * 16, PDO::PARAM_INT);
   $res = $stmt->execute();
   return $stmt;
 }
 
 function get_most_liked() {
-  $stmt = DB::get()->query(
+  $stmt = DB::get()->prepare(
     '
 SELECT `images`.*,
        COUNT(`il`.`id`) AS `likes`,
@@ -140,11 +143,13 @@ LIMIT 8'
     ];
     ft_reset();
   }
+  $stmt->bindValue(1, $_SESSION['user']['id'] ?? 0, PDO::PARAM_INT);
+  $res = $stmt->execute();
   return $stmt;
 }
 
 function get_most_commented() {
-  $stmt = DB::get()->query(
+  $stmt = DB::get()->prepare(
     '
 SELECT `images`.*,
        COUNT(`il`.`id`) AS `likes`,
@@ -166,6 +171,8 @@ LIMIT 4'
     ];
     ft_reset();
   }
+  $stmt->bindValue(1, $_SESSION['user']['id'] ?? 0, PDO::PARAM_INT);
+  $res = $stmt->execute();
   return $stmt;
 }
 
