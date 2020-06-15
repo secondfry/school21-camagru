@@ -65,6 +65,7 @@ function display_app() {
   }
 
   ?>
+  <a href="/?action=view&page=user" class="sf-button-header">Userpanel</a>
   <a href="/?action=view&page=create" class="sf-button-header">Create</a>
   <?php
 }

@@ -6,7 +6,7 @@ function check_password_existence(?string $pass): bool {
   }
 
   $_SESSION['notification'][] = [
-    'text' => 'Вы не указали пароль при регистрации!',
+    'text' => 'Вы не указали пароль!',
     'type' => 'bad',
   ];
 

@@ -6,7 +6,7 @@ function check_name_existence(?string $name): bool {
   }
 
   $_SESSION['notification'][] = [
-    'text' => 'Вы не указали имя при регистрации!',
+    'text' => 'Вы не указали имя пользователя!',
     'type' => 'bad',
   ];
 

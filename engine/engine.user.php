@@ -397,3 +397,274 @@ function check_uuid(string $table) {
     ft_reset();
   }
 }
+
+function change_username() {
+  $name = $_POST['name'] ?? null;
+  $old_passwd = $_POST['old_passwd'] ?? null;
+
+  $res = 0;
+  if (!check_name($name)) {
+    $res += 1;
+  }
+
+  if ($res !== 0) {
+    ft_reset_to('/?action=view&page=user');
+  }
+
+  $stmt = DB::get()->query('SELECT `password` FROM `users` WHERE `id` = ' . $_SESSION['user']['id']);
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  $passwd_db = $row['password'] ?? null;
+
+  if ($passwd_db !== hash('sha512', $old_passwd)) {
+    $_SESSION['notification'][] = [
+      'text' => 'Вы указываете неверный пароль.',
+      'type' => 'bad',
+    ];
+    ft_reset_to('/?action=view&page=user');
+  }
+
+  $stmt = DB::get()->prepare('SELECT 1 FROM `users` WHERE `username` = ?');
+  if (!$stmt) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    ft_reset();
+  }
+  $stmt->bindValue(1, $name, PDO::PARAM_STR);
+  $res = $stmt->execute();
+  $errorFlag = false;
+  while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $errorFlag = true;
+
+    $_SESSION['notification'][] = [
+      'text' => 'Пользователь с таким именем уже зарегистрирован!',
+      'type' => 'bad',
+    ];
+  }
+
+  if ($errorFlag) {
+    $stmt->closeCursor();
+    ft_reset_to('/?action=view&page=user');
+  }
+  $stmt->closeCursor();
+
+  $stmt = DB::get()->prepare('UPDATE `users` SET `username` = ? WHERE `id` = ' . $_SESSION['user']['id']);
+  if (!$stmt) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    ft_reset_to('/?action=view&page=user');
+  }
+
+  $stmt->bindValue(1, $name, PDO::PARAM_STR);
+  $res = $stmt->execute();
+  if (!$res) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    $stmt->closeCursor();
+    ft_reset();
+  }
+  $stmt->closeCursor();
+
+  $_SESSION['notification'][] = [
+    'text' => 'Имя пользователя успешно изменено!',
+    'type' => 'good',
+  ];
+  $_SESSION['user']['username'] = $name;
+
+  ft_reset_to('/?action=view&page=user');
+}
+
+function change_email() {
+  $email = $_POST['email'] ?? null;
+  $old_passwd = $_POST['old_passwd'] ?? null;
+
+  $res = 0;
+  if (!check_email($email)) {
+    $res += 1;
+  }
+
+  if ($res !== 0) {
+    ft_reset_to('/?action=view&page=user');
+  }
+
+  $stmt = DB::get()->query('SELECT `password` FROM `users` WHERE `id` = ' . $_SESSION['user']['id']);
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  $pass_wd = $row['password'] ?? null;
+
+  if ($pass_wd !== hash('sha512', $old_passwd)) {
+    $_SESSION['notification'][] = [
+      'text' => 'Вы указываете неверный пароль.',
+      'type' => 'bad',
+    ];
+    ft_reset_to('/?action=view&page=user');
+  }
+
+  $stmt = DB::get()->prepare('SELECT 1 FROM `users` WHERE `email` = ?');
+  if (!$stmt) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    ft_reset();
+  }
+  $stmt->bindValue(1, $email, PDO::PARAM_STR);
+  $res = $stmt->execute();
+  $errorFlag = false;
+  while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $errorFlag = true;
+
+    $_SESSION['notification'][] = [
+      'text' => 'Пользователь с таким адресом электронной почты уже зарегистрирован!',
+      'type' => 'bad',
+    ];
+  }
+
+  if ($errorFlag) {
+    $stmt->closeCursor();
+    ft_reset_to('/?action=view&page=user');
+  }
+  $stmt->closeCursor();
+
+  $stmt = DB::get()->prepare('UPDATE `users` SET `email` = ?, `confirmed` = 0 WHERE `id` = ' . $_SESSION['user']['id']);
+  if (!$stmt) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    ft_reset_to('/?action=view&page=user');
+  }
+
+  $stmt->bindValue(1, $email, PDO::PARAM_STR);
+  $res = $stmt->execute();
+  if (!$res) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    $stmt->closeCursor();
+    ft_reset();
+  }
+  $stmt->closeCursor();
+
+  $_SESSION['notification'][] = [
+    'text' => 'Адрес электронной почты успешно изменен! Теперь вам нужно его подтвердить.',
+    'type' => 'good',
+  ];
+  $_SESSION['user']['email'] = $email;
+
+  $uuid = UUID::v4();
+
+  $stmt = DB::get()->prepare('INSERT INTO `confirmations` (`user_id`, `uuid`) VALUES (?, ?)');
+  if (!$stmt) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    ft_reset();
+  }
+
+  $stmt->bindValue(1, $_SESSION['user']['id'] ?? 0, PDO::PARAM_INT);
+  $stmt->bindValue(2, $uuid, PDO::PARAM_STR);
+  $res = $stmt->execute();
+  if (!$res) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    $stmt->closeCursor();
+    ft_reset();
+  }
+  $stmt->closeCursor();
+
+  $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/?action=confirm&uuid=' . $uuid;
+  mail($email, '[oadhesiv\'s camagru] Подтверждение смены электронной почты', 'Подтверджение – ' . $actual_link);
+
+  ft_reset_to('/?action=view&page=user');
+}
+
+function change_password() {
+  $new_passwd = $_POST['new_passwd'] ?? null;
+  $old_passwd = $_POST['old_passwd'] ?? null;
+
+  $res = 0;
+  if (!check_password($new_passwd)) {
+    $res += 1;
+  }
+
+  if ($res !== 0) {
+    ft_reset_to('/?action=view&page=user');
+  }
+
+  $stmt = DB::get()->query('SELECT `password` FROM `users` WHERE `id` = ' . $_SESSION['user']['id']);
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  $pass_wd = $row['password'] ?? null;
+
+  if ($pass_wd !== hash('sha512', $old_passwd)) {
+    $_SESSION['notification'][] = [
+      'text' => 'Вы указываете неверный пароль.',
+      'type' => 'bad',
+    ];
+    ft_reset_to('/?action=view&page=user');
+  }
+
+  $stmt = DB::get()->prepare('UPDATE `users` SET `password` = ? WHERE `id` = ' . $_SESSION['user']['id']);
+  if (!$stmt) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    ft_reset_to('/?action=view&page=user');
+  }
+
+  $stmt->bindValue(1, hash('sha512', $new_passwd), PDO::PARAM_STR);
+  $res = $stmt->execute();
+  if (!$res) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    $stmt->closeCursor();
+    ft_reset();
+  }
+  $stmt->closeCursor();
+
+  $_SESSION['notification'][] = [
+    'text' => 'Ваш пароль успешно изменен!',
+    'type' => 'good',
+  ];
+
+  ft_reset_to('/?action=view&page=user');
+}
+
+function change_notification() {
+  $notification = $_POST['notification'] ?? null;
+
+  if ($notification === null) {
+    $notification_db = 0;
+  } elseif ($notification === 'on') {
+    $notification_db = 1;
+  } else {
+    ft_reset_to('/?action=view&page=user');
+  }
+
+  $stmt = DB::get()->query('UPDATE `users` SET `notification` = ' . $notification_db . ' WHERE `id` = ' . $_SESSION['user']['id']);
+  if (!$stmt) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    ft_reset_to('/?action=view&page=user');
+  }
+
+  $_SESSION['notification'][] = [
+    'text' => 'Ваши настройки уведомлений успешно изменены!',
+    'type' => 'good',
+  ];
+
+  ft_reset_to('/?action=view&page=user');
+}

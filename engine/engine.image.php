@@ -236,7 +236,7 @@ function display_query_thumbnails(PDOStatement $stmt) {
           <span class="sf-counter"><?= $row['likes'] ?></span>
           <span class="sf-image-icon sf-image-comments-icon"></span>
           <span class="sf-counter"><?= $row['comments'] ?></span>
-          <span class="sf-username <?=get_color($row['user_id'])?>"><?=$row['username']?></span>
+          <span class="sf-username <?=get_color($row['user_id'])?>"><?= htmlentities($row['username']) ?></span>
         </div>
       </div>
       <?php

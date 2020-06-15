@@ -6,7 +6,7 @@ function check_email_existence(?string $email): bool {
   }
 
   $_SESSION['notification'][] = [
-    'text' => 'Вы не указали электронную почту при регистрации!',
+    'text' => 'Вы не указали электронную почту!',
     'type' => 'bad',
   ];
 

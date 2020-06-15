@@ -44,10 +44,27 @@ switch($action) {
     ft_reset_no_auth();
     perform_comment();
     return;
+  case 'change_username':
+    ft_reset_no_auth();
+    change_username();
+    return;
+  case 'change_email':
+    ft_reset_no_auth();
+    change_email();
+    return;
+  case 'change_password':
+    ft_reset_no_auth();
+    change_password();
+    return;
+  case 'change_notification':
+    ft_reset_no_auth();
+    change_notification();
+    return;
   case 'view':
     $page = url_get('page', '/^[a-z0-9_]+$/');
     switch ($page) {
       case 'create':
+      case 'user':
         ft_reset_no_auth();
         require_once __DIR__ . '/../views/pages/' . $page . '.php';
         return;
