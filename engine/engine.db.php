@@ -38,9 +38,19 @@ final class DB {
       } catch (\PDOException $e) {
         throw new \PDOException($e->getMessage(), (int)$e->getCode());
       }
+      self::checkIntegrity();
     }
 
     return static::$instance;
+  }
+
+  private static function checkIntegrity(): void
+  {
+    try {
+      self::$instance->query('SELECT 1 FROM `images`');
+    } catch (\PDOException $e) {
+      require_once __DIR__ . '/../config/setup.php';
+    }
   }
 
   /**
