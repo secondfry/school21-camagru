@@ -11,4 +11,5 @@
     </div>
   </div>
 <script src="/bundle/main.manual.js"></script>
+</body>
 </html>
