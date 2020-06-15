@@ -1,6 +1,6 @@
 export const initPageCapture = () => {
   const width = 1280;
-  let height = 0;
+  let height = 720;
   let streaming = false;
   let allowed = false;
   let readyToUpload = false;

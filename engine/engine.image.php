@@ -14,10 +14,10 @@ function image_upload() {
 
   $decoded_params = json_decode($json_params);
 
-  $image          = $decoded_params->data ?? null;
+  $image    = $decoded_params->data ?? null;
   $stickers = $decoded_params->stickers ?? null;
 
-  if (!$image || !$stickers) {
+  if (!$image || !is_array($stickers)) {
     exit;
   }
 
@@ -67,7 +67,7 @@ function image_upload() {
     }
 
     $stickerPath = __DIR__ . '/../dist/images/sticker-' . $res[0] . '.png';
-    $sticker = imagecreatefrompng($stickerPath);
+    $sticker     = imagecreatefrompng($stickerPath);
     imagecopyresized($final, $sticker, 0, 0, 0, 0, $final_w, $final_h, 1280, 720);
     imagedestroy($sticker);
   }
@@ -114,7 +114,7 @@ LEFT JOIN `image_likes` `il` ON `images`.`id` = `il`.`image_id`
 LEFT JOIN `image_comments` `ic` ON `images`.`id` = `ic`.`image_id`
 GROUP BY `images`.`id`
 ORDER BY `created` DESC
-LIMIT ?,25'
+LIMIT ?,100'
   );
   if (!$stmt) {
     $_SESSION['notification'][] = [
@@ -215,13 +215,15 @@ function display_query_thumbnails(PDOStatement $stmt) {
     <?php
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
       ?>
-      <a href="/?action=view&page=image&id=<?= $row['id'] ?>" class="sf-image">
-        <img src="<?= $row['path'] ?>"/>
+      <div class="sf-image">
+        <a href="/?action=view&page=image&id=<?= $row['id'] ?>">
+          <img src="<?= $row['path'] ?>"/>
+        </a>
         <div class="sf-image-info">
           <span class="sf-image-icon sf-image-likes-icon"></span><span><?= $row['likes'] ?></span>
           <span class="sf-image-icon sf-image-comments-icon"></span><span><?= $row['comments'] ?></span>
         </div>
-      </a>
+      </div>
       <?php
     }
     ?>

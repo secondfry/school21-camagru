@@ -82,5 +82,5 @@ function ft_reset_no_auth() {
     return;
   }
 
-  ft_reset();
+  ft_reset_to('/?action=view&page=login');
 }
