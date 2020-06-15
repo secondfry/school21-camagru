@@ -13,15 +13,14 @@ $stmt = fetch_comments($id);
 ?>
   <h1 class="text-3xl my-3 font-bold">Photobomb by @<?= htmlspecialchars($row['username']) ?></h1>
   <div class="sf-image sf-image_solo">
-    <a href="/?action=view&page=image&id=<?= $row['id'] ?>">
-      <img src="<?= $row['path'] ?>"/>
-    </a>
+    <img src="<?= $row['path'] ?>"/>
     <div class="sf-image-info">
       <a class="sf-image-icon <?php if ($row['liked']) echo 'sf-image-likes-solid-icon'; else echo 'sf-image-likes-icon'; ?> sf-action-like" href="#" data-id="<?= $row['id'] ?>"></a>
       <span class="sf-counter"><?= $row['likes'] ?></span>
       <span class="sf-image-icon sf-image-comments-icon"></span>
       <span class="sf-counter"><?= $row['comments'] ?></span>
       <span class="sf-username <?=get_color($row['user_id'])?>"><?= htmlentities($row['username']) ?></span>
+      <?php if ($row['user_id'] === $_SESSION['user']['id']) { ?><a class="sf-remove text-red-700" href="#" data-id="<?=$row['id']?>">Delete this forever?</a><?php } ?>
     </div>
   </div>
   <div class="sf-comments">

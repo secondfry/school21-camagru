@@ -292,3 +292,25 @@ LIMIT 1'
 
   return $row;
 }
+
+function image_remove() {
+  $data = getJSON();
+
+  $imageID = $data->id ?? null;
+  if (!$imageID) {
+    ft_reset();
+  }
+
+  $stmt = DB::get()->prepare('DELETE FROM `images` WHERE `user_id` = ? AND `id` = ?');
+  if (!$stmt) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    ft_reset();
+  }
+
+  $stmt->bindValue(1, $_SESSION['user']['id'] ?? 0, PDO::PARAM_INT);
+  $stmt->bindValue(2, $imageID, PDO::PARAM_INT);
+  $res = $stmt->execute();
+}

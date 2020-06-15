@@ -26,6 +26,30 @@ const initLikes = () => {
         .catch(console.merror.bind(console));
     })
   );
+
+  const removeTexts = document.querySelectorAll('.sf-remove');
+
+  removeTexts.forEach((rt) =>
+    rt.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      const id = rt.dataset['id'];
+      fetch('/?action=remove', {
+        method: 'POST',
+        body: JSON.stringify({
+          id,
+        }),
+      })
+        .then((res) => {
+          res
+            .text()
+            .then(console.mlog.bind(console))
+            .catch(console.merror.bind(console));
+          document.location.href = document.location.href;
+        })
+        .catch(console.merror.bind(console));
+    })
+  );
 };
 
 export const initCommon = () => {

@@ -60,6 +60,10 @@ switch($action) {
     ft_reset_no_auth();
     change_notification();
     return;
+  case 'remove':
+    ft_reset_no_auth();
+    image_remove();
+    return;
   case 'view':
     $page = url_get('page', '/^[a-z0-9_]+$/');
     switch ($page) {
@@ -83,4 +87,8 @@ switch($action) {
         ft_reset();
         return;
     }
+    break;
+  default:
+    ft_reset();
+    return;
 }
