@@ -691,26 +691,11 @@ video {
 }
 
 @font-face {
-  font-family: 'Userbar';
-
-  src: url(/font/userbar.woff2) format('woff2'),
-    url(/font/userbar.ttf) format('truetype');
-}
-
-@font-face {
   font-family: 'MicroN55';
 
   src: url(/font/MicroN55.woff2) format('woff2'),
   url(/font/MicroN55.woff) format('woff'),
   url(/font/MicroN55.ttf) format('truetype');
-}
-
-@font-face {
-  font-family: 'Visitor';
-
-  src: url(/font/VisitorRus.woff2) format('woff2'),
-  url(/font/VisitorRus.woff) format('woff'),
-  url(/font/VisitorRus.ttf) format('truetype');
 }
 
 .sf-link_dark {
