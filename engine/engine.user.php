@@ -40,8 +40,8 @@ function user_register() {
   while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $errorFlag = true;
 
-    $name_db = $row['username'];
-    $email_db = $row['email'];
+    $name_db = $row['username'] ?? null;
+    $email_db = $row['email'] ?? null;
 
     if ($name_db === $name) {
       $_SESSION['notification'][] = [
@@ -159,10 +159,10 @@ function user_login() {
   $res = $stmt->execute();
   $row = $stmt->fetch(PDO::FETCH_ASSOC);
   $id_db = $row['id'];
-  $name_db = $row['username'];
-  $email_db = $row['email'];
-  $pass_db = $row['password'];
-  $confirmed_db = $row['confirmed'];
+  $name_db = $row['username'] ?? null;
+  $email_db = $row['email'] ?? null;
+  $pass_db = $row['password'] ?? null;
+  $confirmed_db = $row['confirmed'] ?? null;
 
   if (!$row) {
     $_SESSION['notification'][] = [
@@ -233,6 +233,11 @@ function user_confirm() {
     ft_reset_to('/?action=view&page=login');
   }
   $stmt->closeCursor();
+
+  $id = $row['user_id'] ?? null;
+  if (!$id) {
+    ft_reset_to('/?action=view&page=login');
+  }
 
   $stmt = DB::get()->prepare('UPDATE `users` SET `confirmed` = 1 WHERE `id` = ?');
   $stmt->bindValue(1, $row['user_id'], PDO::PARAM_INT);
