@@ -19,6 +19,9 @@ switch($action) {
   case 'logout':
     user_logout();
     return;
+  case 'confirm':
+    user_confirm();
+    return;
   case 'setup':
     require_once __DIR__ . '/../config/' . $action . '.php';
     return;

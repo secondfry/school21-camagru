@@ -67,7 +67,7 @@ function user_register() {
   $stmt = DB::get()->prepare('INSERT INTO `users` (`username`, `email`, `password`) VALUES (?, ?, ?)');
   if (!$stmt) {
     $_SESSION['notification'][] = [
-      'text' => 'Ошибка MySQL.',
+      'text' => 'Ошибка SQL.',
       'type' => 'bad',
     ];
     ft_reset();
@@ -78,12 +78,49 @@ function user_register() {
   $stmt->bindValue(2, $email, PDO::PARAM_STR);
   $stmt->bindValue(3, $pass, PDO::PARAM_STR);
   $res = $stmt->execute();
+  if (!$res) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    $stmt->closeCursor();
+    ft_reset();
+  }
+  $stmt->closeCursor();
+
+  $id = DB::get()->lastInsertId();
+  $uuid = UUID::v4();
+
+  $stmt = DB::get()->prepare('INSERT INTO `confirmations` (`user_id`, `uuid`) VALUES (?, ?)');
+  if (!$stmt) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    ft_reset();
+  }
+
+  $stmt->bindValue(1, $id, PDO::PARAM_INT);
+  $stmt->bindValue(2, $uuid, PDO::PARAM_STR);
+  $res = $stmt->execute();
+  if (!$res) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    $stmt->closeCursor();
+    ft_reset();
+  }
   $stmt->closeCursor();
 
   $_SESSION['notification'][] = [
-    'text' => 'Регистрация прошла успешно! Теперь Вы можете войти.',
+    'text' => 'Регистрация прошла успешно! Пожалуйста, подтвердите ваш email при помощи ссылки в письме.',
     'type' => 'good',
   ];
+
+  $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/?action=confirm&uuid=' . $uuid;
+  mail($email, 'Подтверждение регистрации на oadhesiv\'s camagru', 'Подтверджение – ' . $actual_link);
+
   ft_reset();
 }
 
@@ -109,10 +146,10 @@ function user_login() {
     ft_reset_to('/?action=view&page=login');
   }
 
-  $stmt = DB::get()->prepare('SELECT `id`, `username`, `email`, `password` FROM `users` WHERE `username` = ?');
+  $stmt = DB::get()->prepare('SELECT `id`, `username`, `email`, `password`, `confirmed`, `notification` FROM `users` WHERE `username` = ?');
   if (!$stmt) {
     $_SESSION['notification'][] = [
-      'text' => 'Ошибка MySQL.',
+      'text' => 'Ошибка SQL.',
       'type' => 'bad',
     ];
     ft_reset();
@@ -125,6 +162,7 @@ function user_login() {
   $name_db = $row['username'];
   $email_db = $row['email'];
   $pass_db = $row['password'];
+  $confirmed_db = $row['confirmed'];
 
   if (!$row) {
     $_SESSION['notification'][] = [
@@ -137,9 +175,19 @@ function user_login() {
   $stmt->closeCursor();
 
   $pass = hash('sha512', $pass);
-  if ($pass != $pass_db) {
+  if ($pass !== $pass_db) {
     $_SESSION['notification'][] = [
       'text' => 'Проверьте свой логин и пароль.',
+      'type' => 'bad',
+    ];
+    ft_reset_to('/?action=view&page=login');
+  }
+
+  var_dump($row);
+
+  if ($confirmed_db === "0") {
+    $_SESSION['notification'][] = [
+      'text' => 'Пожалуйста, подтвердите ваш email при помощи ссылки в письме.',
       'type' => 'bad',
     ];
     ft_reset_to('/?action=view&page=login');
@@ -168,4 +216,31 @@ function user_logout() {
     'email' => '',
   ];
   ft_reset();
+}
+
+function user_confirm() {
+  $uuid = $_GET['uuid'] ?? null;
+
+  if (!$uuid) {
+    ft_reset_to('/?action=view&page=login');
+  }
+
+  $stmt = DB::get()->prepare('SELECT `user_id` FROM `confirmations` WHERE `uuid` = ?');
+  $stmt->bindValue(1, $uuid, PDO::PARAM_STR);
+  $res = $stmt->execute();
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  if (!$row) {
+    ft_reset_to('/?action=view&page=login');
+  }
+  $stmt->closeCursor();
+
+  $stmt = DB::get()->prepare('UPDATE `users` SET `confirmed` = 1 WHERE `id` = ?');
+  $stmt->bindValue(1, $row['user_id'], PDO::PARAM_INT);
+  $stmt->execute();
+
+  $_SESSION['notification'][] = [
+    'text' => 'Успешное подтверждение аккаунта. Теперь вы можете войти ( ͡° ͜ʖ ͡°)',
+    'type' => 'good',
+  ];
+  ft_reset_to('/?action=view&page=login');
 }
