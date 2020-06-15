@@ -1,5 +1,7 @@
 <?php
 
+ob_start();
+
 require_once __DIR__ . '/../engine/engine.php';
 
 $action = url_get('action', '/^[a-z_]+$/');
