@@ -400,7 +400,7 @@ function check_uuid(string $table) {
 
 function change_username() {
   $name = $_POST['name'] ?? null;
-  $old_passwd = $_POST['old_passwd'] ?? null;
+  $old_passwd = $_POST['passwd'] ?? null;
 
   $res = 0;
   if (!check_name($name)) {
@@ -481,7 +481,7 @@ function change_username() {
 
 function change_email() {
   $email = $_POST['email'] ?? null;
-  $old_passwd = $_POST['old_passwd'] ?? null;
+  $old_passwd = $_POST['passwd'] ?? null;
 
   $res = 0;
   if (!check_email($email)) {
