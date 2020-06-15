@@ -20,8 +20,5 @@ module.exports = {
       },
     },
     'postcss-preset-env': {},
-    cssnano: {
-      preset: 'default',
-    },
   },
 };
