@@ -3,7 +3,7 @@
 require_once __DIR__ . '/../components/header.php';
 
 ?>
-  <h1 class="text-2xl">Recover your account</h1>
+  <h1 class="text-3xl my-3 font-bold">Recover your account</h1>
   <form method="post" action="/?action=recover_perform" class="bg-white rounded" id="register-form">
     <input type="hidden" name="uuid" value="<?=$_GET['uuid']?>" />
     <div class="mb-4 flex flex-col md:flex-row md:flex md:items-center">

@@ -3,7 +3,7 @@
 require_once __DIR__ . '/../components/header.php';
 
 ?>
-  <h1 class="text-2xl">Create new photobomb</h1>
+  <h1 class="text-3xl my-3 font-bold">Create new photobomb</h1>
   <div class="sf-creation-layout">
     <div class="sf-thumbnails sf-stickers">
       <a href="#" class="sf-image sf-sticker" data-id="1">
