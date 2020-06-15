@@ -197,7 +197,7 @@ LEFT JOIN `image_comments` `ic` ON `images`.`id` = `ic`.`image_id`
 LEFT JOIN `users` `u` ON `images`.`user_id` = `u`.`id`
 WHERE `images`.`user_id` = ?
 GROUP BY `images`.`id`
-ORDER BY `comments` DESC, `created` DESC
+ORDER BY `created` DESC
 LIMIT 16'
   );
   if (!$stmt) {
