@@ -98,7 +98,6 @@ function get_all_images(int $page) {
 SELECT `images`.*,
        COUNT(DISTINCT `il`.`id`) AS `likes`,
        COUNT(DISTINCT `ic`.`id`) AS `comments`,
-       CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`,
        `u`.`username`
 FROM `images`
 LEFT JOIN `image_likes` `il` ON `images`.`id` = `il`.`image_id`
@@ -116,23 +115,20 @@ LIMIT ?,16'
     ];
     ft_reset();
   }
-  $stmt->bindValue(1, $_SESSION['user']['id'] ?? 0, PDO::PARAM_INT);
-  $stmt->bindValue(2, $page * 16, PDO::PARAM_INT);
+  $stmt->bindValue(1, $page * 16, PDO::PARAM_INT);
   $res = $stmt->execute();
   return $stmt;
 }
 
 function get_most_liked() {
-  $stmt = DB::get()->prepare(
+  $stmt = DB::get()->query(
     '
 SELECT `images`.*,
        COUNT(DISTINCT `il`.`id`) AS `likes`,
        COUNT(DISTINCT `ic`.`id`) AS `comments`,
-       CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`,
        `u`.`username`
 FROM `images`
 LEFT JOIN `image_likes` `il` ON `images`.`id` = `il`.`image_id`
-LEFT JOIN `image_likes` `ilm` ON `images`.`id` = `ilm`.`image_id`
 LEFT JOIN `image_comments` `ic` ON `images`.`id` = `ic`.`image_id`
 LEFT JOIN `users` `u` ON `images`.`user_id` = `u`.`id`
 GROUP BY `images`.`id`
@@ -147,28 +143,25 @@ LIMIT 8'
     ];
     ft_reset();
   }
-  $stmt->bindValue(1, $_SESSION['user']['id'] ?? 0, PDO::PARAM_INT);
-  $res = $stmt->execute();
+
   return $stmt;
 }
 
 function get_most_commented() {
-  $stmt = DB::get()->prepare(
+  $stmt = DB::get()->query(
     '
 SELECT `images`.*,
        COUNT(DISTINCT `il`.`id`) AS `likes`,
        COUNT(DISTINCT `ic`.`id`) AS `comments`,
-       CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`,
        `u`.`username`
 FROM `images`
 LEFT JOIN `image_likes` `il` ON `images`.`id` = `il`.`image_id`
-LEFT JOIN `image_likes` `ilm` ON `images`.`id` = `ilm`.`image_id`
 LEFT JOIN `image_comments` `ic` ON `images`.`id` = `ic`.`image_id`
 LEFT JOIN `users` `u` ON `images`.`user_id` = `u`.`id`
 GROUP BY `images`.`id`
 HAVING `comments` > 0
 ORDER BY `comments` DESC, `created` DESC
-LIMIT 4'
+LIMIT 8'
   );
   if (!$stmt) {
     $_SESSION['notification'][] = [
@@ -177,8 +170,7 @@ LIMIT 4'
     ];
     ft_reset();
   }
-  $stmt->bindValue(1, $_SESSION['user']['id'] ?? 0, PDO::PARAM_INT);
-  $res = $stmt->execute();
+
   return $stmt;
 }
 
@@ -188,11 +180,9 @@ function get_user_images(int $id) {
 SELECT `images`.*,
        COUNT(DISTINCT `il`.`id`) AS `likes`,
        COUNT(DISTINCT `ic`.`id`) AS `comments`,
-       CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`,
        `u`.`username`
 FROM `images`
 LEFT JOIN `image_likes` `il` ON `images`.`id` = `il`.`image_id`
-LEFT JOIN `image_likes` `ilm` ON `images`.`id` = `ilm`.`image_id`
 LEFT JOIN `image_comments` `ic` ON `images`.`id` = `ic`.`image_id`
 LEFT JOIN `users` `u` ON `images`.`user_id` = `u`.`id`
 WHERE `images`.`user_id` = ?
@@ -208,7 +198,6 @@ LIMIT 16'
     ft_reset();
   }
   $stmt->bindValue(1, $id, PDO::PARAM_INT);
-  $stmt->bindValue(2, $id, PDO::PARAM_INT);
   $stmt->execute();
   if (!$stmt) {
     $_SESSION['notification'][] = [
@@ -221,18 +210,20 @@ LIMIT 16'
 }
 
 function display_query_thumbnails(PDOStatement $stmt) {
+  $mylikes = all_my_image_likes();
   $i = 0;
   ?>
   <div class="sf-thumbnails">
     <?php
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $liked = $mylikes[$row['id']] ?? false;
       ?>
       <div class="sf-image">
         <a href="/?action=view&page=image&id=<?= $row['id'] ?>">
           <img src="<?= $row['path'] ?>"/>
         </a>
         <div class="sf-image-info">
-          <a class="sf-image-icon <?php if ($row['liked']) echo 'sf-image-likes-solid-icon'; else echo 'sf-image-likes-icon'; ?> sf-action-like" href="#" data-id="<?= $row['id'] ?>"></a>
+          <a class="sf-image-icon <?php if ($liked !== false) echo 'sf-image-likes-solid-icon'; else echo 'sf-image-likes-icon'; ?> sf-action-like" href="#" data-id="<?= $row['id'] ?>"></a>
           <span class="sf-counter"><?= $row['likes'] ?></span>
           <span class="sf-image-icon sf-image-comments-icon"></span>
           <span class="sf-counter"><?= $row['comments'] ?></span>
@@ -263,11 +254,9 @@ function fetch_image(string $id) {
 SELECT `images`.*,
        COUNT(DISTINCT `il`.`id`) AS `likes`,
        COUNT(DISTINCT `ic`.`id`) AS `comments`,
-       CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`,
        `u`.`username`
 FROM `images`
 LEFT JOIN `image_likes` `il` ON `images`.`id` = `il`.`image_id`
-LEFT JOIN `image_likes` `ilm` ON `images`.`id` = `ilm`.`image_id`
 LEFT JOIN `image_comments` `ic` ON `images`.`id` = `ic`.`image_id`
 LEFT JOIN `users` `u` ON `images`.`user_id` = `u`.`id`
 WHERE `images`.`id` = ?
@@ -282,12 +271,37 @@ LIMIT 1'
     ft_reset();
   }
 
-  $stmt->bindValue(1, $_SESSION['user']['id'] ?? 0, PDO::PARAM_INT);
-  $stmt->bindValue(2, $id, PDO::PARAM_INT);
+  $stmt->bindValue(1, $id, PDO::PARAM_INT);
   $res = $stmt->execute();
   $row = $stmt->fetch(PDO::FETCH_ASSOC);
   if (!$row) {
     ft_reset();
+  }
+
+  $stmt = DB::get()->prepare(
+    '
+SELECT `images`.`id`
+FROM `images`
+LEFT JOIN `image_likes` `il` ON `images`.`id` = `il`.`image_id`
+WHERE `il`.`user_id` = ? AND `images`.`id` = ?
+LIMIT 1'
+  );
+  if (!$stmt) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    ft_reset();
+  }
+
+  $stmt->bindValue(1, $_SESSION['user']['id'] ?? 0, PDO::PARAM_INT);
+  $stmt->bindValue(2, $id, PDO::PARAM_INT);
+  $res = $stmt->execute();
+  $row_likes = $stmt->fetch(PDO::FETCH_ASSOC);
+  if (!$row_likes) {
+    $row['liked'] = 0;
+  } else {
+    $row['liked'] = 1;
   }
 
   return $row;
@@ -313,4 +327,31 @@ function image_remove() {
   $stmt->bindValue(1, $_SESSION['user']['id'] ?? 0, PDO::PARAM_INT);
   $stmt->bindValue(2, $imageID, PDO::PARAM_INT);
   $res = $stmt->execute();
+}
+
+$GLOBALS['my_likes'] = null;
+
+function all_my_image_likes() {
+  if ($GLOBALS['my_likes']) {
+    return $GLOBALS['my_likes'];
+  }
+
+  $stmt = DB::get()->prepare('SELECT `image_id`, 1 FROM `image_likes` WHERE `user_id` = ?');
+  if (!$stmt) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    ft_reset();
+  }
+
+  $stmt->bindValue(1, $_SESSION['user']['id'] ?? 0, PDO::PARAM_INT);
+  $res = $stmt->execute();
+  $ret = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+  if (!$ret) {
+    ft_reset();
+  }
+
+  $GLOBALS['my_likes'] = $ret;
+  return $ret;
 }
