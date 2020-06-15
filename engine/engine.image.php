@@ -348,9 +348,6 @@ function all_my_image_likes() {
   $stmt->bindValue(1, $_SESSION['user']['id'] ?? 0, PDO::PARAM_INT);
   $res = $stmt->execute();
   $ret = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-  if (!$ret) {
-    ft_reset();
-  }
 
   $GLOBALS['my_likes'] = $ret;
   return $ret;
