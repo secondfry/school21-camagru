@@ -40,6 +40,19 @@ CREATE TABLE `confirmations` (
   CONSTRAINT `confirmations_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+/*Table structure for table `recovers` */
+
+DROP TABLE IF EXISTS `recovers`;
+
+CREATE TABLE `recovers` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL,
+  `uuid` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `recovers_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 /*Table structure for table `images` */
 
 DROP TABLE IF EXISTS `images`;

@@ -34,7 +34,20 @@ CREATE TABLE `confirmations` (
   `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   `user_id` int(10) NOT NULL,
   `uuid` text NOT NULL,
+  `used` int(1) NOT NULL DEFAULT '0',
   CONSTRAINT `confirmations_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+);
+
+/*Table structure for table `recovers` */
+
+DROP TABLE IF EXISTS `recovers`;
+
+CREATE TABLE `recovers` (
+  `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  `user_id` int(10) NOT NULL,
+  `uuid` text NOT NULL,
+  `used` int(1) NOT NULL DEFAULT '0',
+  CONSTRAINT `recovers_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 );
 
 /*Table structure for table `images` */

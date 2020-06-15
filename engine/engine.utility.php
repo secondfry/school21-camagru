@@ -33,8 +33,8 @@ function display_notification() {
 
   foreach($_SESSION['notification'] as $v) {
     ?>
-    <div class="notification <?=$v['type']?>">
-      <?=$v['text']?>
+    <div class="notification <?=$v['type'] ?? ''?>">
+      <?=$v['text'] ?? ''?>
     </div>
     <?php
   }

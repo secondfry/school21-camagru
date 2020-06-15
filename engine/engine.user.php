@@ -183,8 +183,6 @@ function user_login() {
     ft_reset_to('/?action=view&page=login');
   }
 
-  var_dump($row);
-
   if ($confirmed_db === "0") {
     $_SESSION['notification'][] = [
       'text' => 'Пожалуйста, подтвердите ваш email при помощи ссылки в письме.',
@@ -221,11 +219,11 @@ function user_logout() {
 function user_confirm() {
   $uuid = $_GET['uuid'] ?? null;
 
-  if (!$uuid) {
+  if (!$uuid || !UUID::is_valid($uuid)) {
     ft_reset_to('/?action=view&page=login');
   }
 
-  $stmt = DB::get()->prepare('SELECT `user_id` FROM `confirmations` WHERE `uuid` = ?');
+  $stmt = DB::get()->prepare('SELECT `user_id` FROM `confirmations` WHERE `used` = 0 AND `uuid` = ?');
   $stmt->bindValue(1, $uuid, PDO::PARAM_STR);
   $res = $stmt->execute();
   $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -242,9 +240,123 @@ function user_confirm() {
   $stmt = DB::get()->prepare('UPDATE `users` SET `confirmed` = 1 WHERE `id` = ?');
   $stmt->bindValue(1, $row['user_id'], PDO::PARAM_INT);
   $stmt->execute();
+  $stmt = DB::get()->prepare('UPDATE `confirmations` SET `used` = 1 WHERE `uuid` = ?');
+  $stmt->bindValue(1, $uuid, PDO::PARAM_STR);
+  $stmt->execute();
 
   $_SESSION['notification'][] = [
     'text' => 'Успешное подтверждение аккаунта. Теперь вы можете войти ( ͡° ͜ʖ ͡°)',
+    'type' => 'good',
+  ];
+  ft_reset_to('/?action=view&page=login');
+}
+
+function user_recover_initiate() {
+  $email = $_POST['email'] ?? null;
+
+  if (!$email) {
+    ft_reset_to('/?action=view&page=recover');
+  }
+
+  $stmt = DB::get()->prepare('SELECT `id` FROM `users` WHERE `email` = ?');
+  $stmt->bindValue(1, $email, PDO::PARAM_STR);
+  if (!$stmt) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    ft_reset();
+  }
+  $res = $stmt->execute();
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  if (!$row) {
+    $_SESSION['notification'][] = [
+      'text' => 'Вам следует вначале зарегистроваться.',
+    ];
+    ft_reset();
+  }
+  $id = $row['id'] ?? null;
+
+  if (!$id) {
+    ft_reset_to('/?action=view&page=recover_step_1');
+  }
+
+  $uuid = UUID::v4();
+  $stmt = DB::get()->prepare('INSERT INTO `recovers` (`user_id`, `uuid`) VALUES (?, ?)');
+  if (!$stmt) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    ft_reset();
+  }
+
+  $stmt->bindValue(1, $id, PDO::PARAM_INT);
+  $stmt->bindValue(2, $uuid, PDO::PARAM_STR);
+  $res = $stmt->execute();
+  if (!$res) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    $stmt->closeCursor();
+    ft_reset();
+  }
+  $stmt->closeCursor();
+
+  $_SESSION['notification'][] = [
+    'text' => 'Ссылка для сброса пароля отправлена вам на почту.',
+    'type' => 'good',
+  ];
+
+  $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/?action=view&page=recover_step_2&uuid=' . $uuid;
+  mail($email, 'Восстановление пароля на oadhesiv\'s camagru', 'Восстановление пароля – ' . $actual_link);
+
+  ft_reset();
+}
+
+function user_recover_perform() {
+  $uuid = $_POST['uuid'] ?? null;
+  $pass = $_POST['passwd'] ?? null;
+
+  if (!$uuid || !UUID::is_valid($uuid)) {
+    ft_reset_to('/?action=view&page=recover_step_1');
+  }
+
+  $res = 0;
+  if (!check_password($pass)) {
+    $res += 1;
+  }
+
+  if ($res !== 0) {
+    ft_reset_to('/?action=view&page=recover_step_2&uuid=' . $uuid);
+  }
+
+  $stmt = DB::get()->prepare('SELECT `user_id` FROM `recovers` WHERE `used` = 0 AND `uuid` = ?');
+  $stmt->bindValue(1, $uuid, PDO::PARAM_STR);
+  $res = $stmt->execute();
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  if (!$row) {
+    ft_reset_to('/?action=view&page=recover_step_1');
+  }
+  $stmt->closeCursor();
+
+  $id = $row['user_id'] ?? null;
+  if (!$id) {
+    ft_reset_to('/?action=view&page=recover_step_1');
+  }
+
+  $stmt = DB::get()->prepare('UPDATE `users` SET `password` = ? WHERE `id` = ?');
+  $pass = hash('sha512', $pass);
+  $stmt->bindValue(2, $row['user_id'], PDO::PARAM_INT);
+  $stmt->bindValue(1, $pass, PDO::PARAM_STR);
+  $stmt->execute();
+  $stmt = DB::get()->prepare('UPDATE `recovers` SET `used` = 1 WHERE `uuid` = ?');
+  $stmt->bindValue(1, $uuid, PDO::PARAM_STR);
+  $stmt->execute();
+
+  $_SESSION['notification'][] = [
+    'text' => 'Успешное восстановление аккаунта. Теперь вы можете войти ( ͡° ͜ʖ ͡°)',
     'type' => 'good',
   ];
   ft_reset_to('/?action=view&page=login');
