@@ -1,7 +1,9 @@
 import './style.pcss';
+
 import { initConsole } from './utilities/console';
 import { initPageCapture } from './components/capture';
 import { initPageRegister } from './components/register';
+import { initCommon } from './components/common';
 
 /**
  * In production should be set to false.
@@ -22,3 +24,5 @@ switch (window.location.search) {
     initPageRegister();
     break;
 }
+
+initCommon();

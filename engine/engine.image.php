@@ -1,21 +1,10 @@
 <?php
 
 function image_upload() {
-  function isValidJSON($str) {
-    json_decode($str);
-    return json_last_error() == JSON_ERROR_NONE;
-  }
+  $data = getJSON();
 
-  $json_params = file_get_contents("php://input");
-
-  if (strlen($json_params) == 0 || !isValidJSON($json_params)) {
-    exit;
-  }
-
-  $decoded_params = json_decode($json_params);
-
-  $image    = $decoded_params->data ?? null;
-  $stickers = $decoded_params->stickers ?? null;
+  $image    = $data->data ?? null;
+  $stickers = $data->stickers ?? null;
 
   if (!$image || !is_array($stickers)) {
     exit;
@@ -123,7 +112,7 @@ LIMIT ?,16'
     ];
     ft_reset();
   }
-  $stmt->bindValue(1, $page * 25, PDO::PARAM_INT);
+  $stmt->bindValue(1, $page * 16, PDO::PARAM_INT);
   $res = $stmt->execute();
   return $stmt;
 }
@@ -133,14 +122,16 @@ function get_most_liked() {
     '
 SELECT `images`.*,
        COUNT(`il`.`id`) AS `likes`,
-       COUNT(`ic`.`id`) AS `comments`
+       COUNT(`ic`.`id`) AS `comments`,
+       CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`
 FROM `images`
 LEFT JOIN `image_likes` `il` ON `images`.`id` = `il`.`image_id`
+LEFT JOIN `image_likes` `ilm` ON `images`.`id` = `ilm`.`image_id`
 LEFT JOIN `image_comments` `ic` ON `images`.`id` = `ic`.`image_id`
 GROUP BY `images`.`id`
-HAVING `likes` > 0
-ORDER BY `likes` DESC, `created` DESC
-LIMIT 4'
+HAVING COUNT(`il`.`id`) > 0
+ORDER BY `likes` DESC
+LIMIT 8'
   );
   if (!$stmt) {
     $_SESSION['notification'][] = [
@@ -157,9 +148,11 @@ function get_most_commented() {
     '
 SELECT `images`.*,
        COUNT(`il`.`id`) AS `likes`,
-       COUNT(`ic`.`id`) AS `comments`
+       COUNT(`ic`.`id`) AS `comments`,
+       CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`
 FROM `images`
 LEFT JOIN `image_likes` `il` ON `images`.`id` = `il`.`image_id`
+LEFT JOIN `image_likes` `ilm` ON `images`.`id` = `ilm`.`image_id`
 LEFT JOIN `image_comments` `ic` ON `images`.`id` = `ic`.`image_id`
 GROUP BY `images`.`id`
 HAVING `comments` > 0
@@ -181,9 +174,11 @@ function get_user_images(int $id) {
     '
 SELECT `images`.*,
        COUNT(`il`.`id`) AS `likes`,
-       COUNT(`ic`.`id`) AS `comments`
+       COUNT(`ic`.`id`) AS `comments`,
+       CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`
 FROM `images`
 LEFT JOIN `image_likes` `il` ON `images`.`id` = `il`.`image_id`
+LEFT JOIN `image_likes` `ilm` ON `images`.`id` = `ilm`.`image_id`
 LEFT JOIN `image_comments` `ic` ON `images`.`id` = `ic`.`image_id`
 WHERE `images`.`user_id` = ?
 GROUP BY `images`.`id`
@@ -198,6 +193,7 @@ LIMIT 16'
     ft_reset();
   }
   $stmt->bindValue(1, $id, PDO::PARAM_INT);
+  $stmt->bindValue(2, $id, PDO::PARAM_INT);
   $stmt->execute();
   if (!$stmt) {
     $_SESSION['notification'][] = [
@@ -221,7 +217,7 @@ function display_query_thumbnails(PDOStatement $stmt) {
           <img src="<?= $row['path'] ?>"/>
         </a>
         <div class="sf-image-info">
-          <span class="sf-image-icon sf-image-likes-icon"></span><span><?= $row['likes'] ?></span>
+          <a class="sf-image-icon <?php if ($row['liked']) echo 'sf-image-likes-solid-icon'; else echo 'sf-image-likes-icon'; ?> sf-action-like" href="#" data-id="<?= $row['id'] ?>"></a><span><?= $row['likes'] ?></span>
           <span class="sf-image-icon sf-image-comments-icon"></span><span><?= $row['comments'] ?></span>
         </div>
       </div>

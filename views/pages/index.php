@@ -3,34 +3,24 @@
 require_once __DIR__ . '/../components/header.php';
 
 ?>
-<h1 class="text-2xl">Gallery</h1>
-<h2 class="text-xl">Most liked</h2>
+<h1 class="text-3xl my-3 font-bold">Gallery</h1>
+<h2 class="text-2xl my-2 font-bold">Most liked</h2>
 <?php
-
-$stmt = get_most_liked();
-if ($stmt->rowCount())
-  display_query_thumbnails($stmt);
-else {
-  ?>
+  $stmt = get_most_liked();
+  $count = display_query_thumbnails($stmt);
+  if ($count === 0) { ?>
   You'd better like something and it will instantly get to the top!
-  <?php
-}
-
+  <?php }
 ?>
-<h2 class="text-xl">Most commented</h2>
+<h2 class="text-2xl my-2 font-bold">Most commented</h2>
 <?php
-
-$stmt = get_most_commented();
-if ($stmt->rowCount())
-  display_query_thumbnails($stmt);
-else {
-  ?>
+  $stmt = get_most_commented();
+  $count = display_query_thumbnails($stmt);
+  if ($count === 0) { ?>
   You'd better comment upon something and it will instantly get to the top!
-  <?php
-}
-
+  <?php }
 ?>
-<h2 class="text-xl">Recent additions</h2>
+<h2 class="text-2xl my-2 font-bold">Recent additions</h2>
 <?php
 
 $page = url_get('limit', '/^[0-9]+$/');

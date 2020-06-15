@@ -36,6 +36,10 @@ switch($action) {
     ft_reset_no_auth();
     image_upload();
     return;
+  case 'like_toggle':
+    ft_reset_no_auth();
+    like_toggle();
+    return;
   case 'view':
     $page = url_get('page', '/^[a-z0-9_]+$/');
     switch ($page) {

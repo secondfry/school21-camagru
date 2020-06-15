@@ -22,7 +22,7 @@ function ft_reset_to($page) {
     return;
   }
 
-//  header('Location: ' . $page);
+  header('Location: ' . $page);
   exit;
 }
 
@@ -83,4 +83,19 @@ function ft_reset_no_auth() {
   }
 
   ft_reset_to('/?action=view&page=login');
+}
+
+function isValidJSON($str) {
+  json_decode($str);
+  return json_last_error() == JSON_ERROR_NONE;
+}
+
+function getJSON() {
+  $json_params = file_get_contents("php://input");
+
+  if (strlen($json_params) == 0 || !isValidJSON($json_params)) {
+    exit;
+  }
+
+  return json_decode($json_params);
 }

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <link rel="stylesheet" href="/bundle/main.css">
+<script>const userLogon = <?php if (user_logon()) { ?>true<?php } else { ?>false<?php } ?>;</script>
 </head>
 <body class="min-h-screen flex flex-col">
   <div id="header" class="bg-gray-800 text-white">
