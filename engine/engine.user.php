@@ -119,7 +119,7 @@ function user_register() {
   ];
 
   $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/?action=confirm&uuid=' . $uuid;
-  mail($email, 'Подтверждение регистрации на oadhesiv\'s camagru', 'Подтверджение – ' . $actual_link);
+  mail($email, '[oadhesiv\'s camagru] Подтверждение регистрации', 'Подтверджение – ' . $actual_link);
 
   ft_reset();
 }
@@ -310,7 +310,7 @@ function user_recover_initiate() {
   ];
 
   $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/?action=view&page=recover_step_2&uuid=' . $uuid;
-  mail($email, 'Восстановление пароля на oadhesiv\'s camagru', 'Восстановление пароля – ' . $actual_link);
+  mail($email, '[oadhesiv\'s camagru] Восстановление пароля', 'Восстановление пароля – ' . $actual_link);
 
   ft_reset();
 }

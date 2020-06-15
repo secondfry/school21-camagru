@@ -21,7 +21,7 @@ const initLikes = () => {
             .text()
             .then(console.mlog.bind(console))
             .catch(console.merror.bind(console));
-          // document.location.href = document.location.href;
+          document.location.href = document.location.href;
         })
         .catch(console.merror.bind(console));
     })

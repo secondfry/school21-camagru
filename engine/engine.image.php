@@ -96,8 +96,8 @@ function get_all_images(int $page) {
   $stmt = DB::get()->prepare(
     '
 SELECT `images`.*,
-       COUNT(`il`.`id`) AS `likes`,
-       COUNT(`ic`.`id`) AS `comments`,
+       COUNT(DISTINCT `il`.`id`) AS `likes`,
+       COUNT(DISTINCT `ic`.`id`) AS `comments`,
        CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`,
        `u`.`username`
 FROM `images`
@@ -126,8 +126,8 @@ function get_most_liked() {
   $stmt = DB::get()->prepare(
     '
 SELECT `images`.*,
-       COUNT(`il`.`id`) AS `likes`,
-       COUNT(`ic`.`id`) AS `comments`,
+       COUNT(DISTINCT `il`.`id`) AS `likes`,
+       COUNT(DISTINCT `ic`.`id`) AS `comments`,
        CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`,
        `u`.`username`
 FROM `images`
@@ -156,8 +156,8 @@ function get_most_commented() {
   $stmt = DB::get()->prepare(
     '
 SELECT `images`.*,
-       COUNT(`il`.`id`) AS `likes`,
-       COUNT(`ic`.`id`) AS `comments`,
+       COUNT(DISTINCT `il`.`id`) AS `likes`,
+       COUNT(DISTINCT `ic`.`id`) AS `comments`,
        CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`,
        `u`.`username`
 FROM `images`
@@ -186,8 +186,8 @@ function get_user_images(int $id) {
   $stmt = DB::get()->prepare(
     '
 SELECT `images`.*,
-       COUNT(`il`.`id`) AS `likes`,
-       COUNT(`ic`.`id`) AS `comments`,
+       COUNT(DISTINCT `il`.`id`) AS `likes`,
+       COUNT(DISTINCT `ic`.`id`) AS `comments`,
        CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`,
        `u`.`username`
 FROM `images`
@@ -236,7 +236,7 @@ function display_query_thumbnails(PDOStatement $stmt) {
           <span class="sf-counter"><?= $row['likes'] ?></span>
           <span class="sf-image-icon sf-image-comments-icon"></span>
           <span class="sf-counter"><?= $row['comments'] ?></span>
-          <span class="sf-username"><?=$row['username']?></span>
+          <span class="sf-username <?=get_color($row['user_id'])?>"><?=$row['username']?></span>
         </div>
       </div>
       <?php
@@ -255,4 +255,40 @@ function display_user_image_thumbnails(int $id) {
 
 function display_my_image_thumbnails() {
   display_user_image_thumbnails($_SESSION['user']['id']);
+}
+
+function fetch_image(string $id) {
+  $stmt = DB::get()->prepare(
+    '
+SELECT `images`.*,
+       COUNT(DISTINCT `il`.`id`) AS `likes`,
+       COUNT(DISTINCT `ic`.`id`) AS `comments`,
+       CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`,
+       `u`.`username`
+FROM `images`
+LEFT JOIN `image_likes` `il` ON `images`.`id` = `il`.`image_id`
+LEFT JOIN `image_likes` `ilm` ON `images`.`id` = `ilm`.`image_id`
+LEFT JOIN `image_comments` `ic` ON `images`.`id` = `ic`.`image_id`
+LEFT JOIN `users` `u` ON `images`.`user_id` = `u`.`id`
+WHERE `images`.`id` = ?
+GROUP BY `images`.`id`
+LIMIT 1'
+  );
+  if (!$stmt) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    ft_reset();
+  }
+
+  $stmt->bindValue(1, $_SESSION['user']['id'] ?? 0, PDO::PARAM_INT);
+  $stmt->bindValue(2, $id, PDO::PARAM_INT);
+  $res = $stmt->execute();
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  if (!$row) {
+    ft_reset();
+  }
+
+  return $row;
 }
