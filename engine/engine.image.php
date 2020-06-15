@@ -234,7 +234,7 @@ function display_query_thumbnails(PDOStatement $stmt) {
         <div class="sf-image-info">
           <a class="sf-image-icon <?php if ($row['liked']) echo 'sf-image-likes-solid-icon'; else echo 'sf-image-likes-icon'; ?> sf-action-like" href="#" data-id="<?= $row['id'] ?>"></a><span><?= $row['likes'] ?></span>
           <span class="sf-image-icon sf-image-comments-icon"></span><span><?= $row['comments'] ?></span>
-          <span><?=$row['username']?></span>
+          <span class="sf-username"><?=$row['username']?></span>
         </div>
       </div>
       <?php
