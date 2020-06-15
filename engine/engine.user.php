@@ -361,3 +361,39 @@ function user_recover_perform() {
   ];
   ft_reset_to('/?action=view&page=login');
 }
+
+function check_uuid(string $table) {
+  $uuid = $_GET['uuid'] ?? null;
+
+  if (!$uuid || !UUID::is_valid($uuid)) {
+    ft_reset_to('/');
+  }
+
+  switch ($table) {
+    case 'recovers':
+      $stmt = DB::get()->prepare('SELECT `used` FROM `recovers` WHERE `uuid` = ?');
+      break;
+    case 'confirmations':
+      $stmt = DB::get()->prepare('SELECT `used` FROM `confirmations` WHERE `uuid` = ?');
+      break;
+  }
+
+  if (!$stmt) {
+    $_SESSION['notification'][] = [
+      'text' => 'Ошибка SQL.',
+      'type' => 'bad',
+    ];
+    ft_reset();
+  }
+
+  $stmt->bindValue(1, $uuid, PDO::PARAM_STR);
+  $res = $stmt->execute();
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  if (!$row || $row['used']) {
+    $_SESSION['notification'][] = [
+      'text' => 'Вы не можете использовать одну и ту же ссылку дважды.',
+      'type' => 'bad',
+    ];
+    ft_reset();
+  }
+}

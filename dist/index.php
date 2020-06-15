@@ -20,6 +20,7 @@ switch($action) {
     user_logout();
     return;
   case 'confirm':
+    check_uuid('confirmations');
     user_confirm();
     return;
   case 'recover_initiate':
@@ -37,8 +38,11 @@ switch($action) {
       case 'register':
       case 'login':
       case 'recover_step_1':
-      case 'recover_step_2':
       case 'create':
+        require_once __DIR__ . '/../views/pages/' . $page . '.php';
+        return;
+      case 'recover_step_2':
+        check_uuid('recovers');
         require_once __DIR__ . '/../views/pages/' . $page . '.php';
         return;
       default:
