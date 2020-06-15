@@ -98,11 +98,13 @@ function get_all_images(int $page) {
 SELECT `images`.*,
        COUNT(`il`.`id`) AS `likes`,
        COUNT(`ic`.`id`) AS `comments`,
-       CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`
+       CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`,
+       `u`.`username`
 FROM `images`
 LEFT JOIN `image_likes` `il` ON `images`.`id` = `il`.`image_id`
 LEFT JOIN `image_likes` `ilm` ON `images`.`id` = `ilm`.`image_id`
 LEFT JOIN `image_comments` `ic` ON `images`.`id` = `ic`.`image_id`
+LEFT JOIN `users` `u` ON `images`.`user_id` = `u`.`id`
 GROUP BY `images`.`id`
 ORDER BY `created` DESC
 LIMIT ?,16'
@@ -126,14 +128,16 @@ function get_most_liked() {
 SELECT `images`.*,
        COUNT(`il`.`id`) AS `likes`,
        COUNT(`ic`.`id`) AS `comments`,
-       CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`
+       CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`,
+       `u`.`username`
 FROM `images`
 LEFT JOIN `image_likes` `il` ON `images`.`id` = `il`.`image_id`
 LEFT JOIN `image_likes` `ilm` ON `images`.`id` = `ilm`.`image_id`
 LEFT JOIN `image_comments` `ic` ON `images`.`id` = `ic`.`image_id`
+LEFT JOIN `users` `u` ON `images`.`user_id` = `u`.`id`
 GROUP BY `images`.`id`
 HAVING COUNT(`il`.`id`) > 0
-ORDER BY `likes` DESC
+ORDER BY `likes` DESC, `created` DESC
 LIMIT 8'
   );
   if (!$stmt) {
@@ -154,11 +158,13 @@ function get_most_commented() {
 SELECT `images`.*,
        COUNT(`il`.`id`) AS `likes`,
        COUNT(`ic`.`id`) AS `comments`,
-       CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`
+       CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`,
+       `u`.`username`
 FROM `images`
 LEFT JOIN `image_likes` `il` ON `images`.`id` = `il`.`image_id`
 LEFT JOIN `image_likes` `ilm` ON `images`.`id` = `ilm`.`image_id`
 LEFT JOIN `image_comments` `ic` ON `images`.`id` = `ic`.`image_id`
+LEFT JOIN `users` `u` ON `images`.`user_id` = `u`.`id`
 GROUP BY `images`.`id`
 HAVING `comments` > 0
 ORDER BY `comments` DESC, `created` DESC
@@ -182,11 +188,13 @@ function get_user_images(int $id) {
 SELECT `images`.*,
        COUNT(`il`.`id`) AS `likes`,
        COUNT(`ic`.`id`) AS `comments`,
-       CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`
+       CASE WHEN `ilm`.`user_id` = ? THEN 1 ELSE 0 END AS `liked`,
+       `u`.`username`
 FROM `images`
 LEFT JOIN `image_likes` `il` ON `images`.`id` = `il`.`image_id`
 LEFT JOIN `image_likes` `ilm` ON `images`.`id` = `ilm`.`image_id`
 LEFT JOIN `image_comments` `ic` ON `images`.`id` = `ic`.`image_id`
+LEFT JOIN `users` `u` ON `images`.`user_id` = `u`.`id`
 WHERE `images`.`user_id` = ?
 GROUP BY `images`.`id`
 ORDER BY `comments` DESC, `created` DESC
@@ -226,6 +234,7 @@ function display_query_thumbnails(PDOStatement $stmt) {
         <div class="sf-image-info">
           <a class="sf-image-icon <?php if ($row['liked']) echo 'sf-image-likes-solid-icon'; else echo 'sf-image-likes-icon'; ?> sf-action-like" href="#" data-id="<?= $row['id'] ?>"></a><span><?= $row['likes'] ?></span>
           <span class="sf-image-icon sf-image-comments-icon"></span><span><?= $row['comments'] ?></span>
+          <span><?=$row['username']?></span>
         </div>
       </div>
       <?php
