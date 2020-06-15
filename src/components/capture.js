@@ -18,16 +18,15 @@ export const initPageCapture = () => {
   function afterPageLoad() {
     if (!navigator?.mediaDevices) {
       console.mlog('navigator.mediaDevices is undefined');
-      return;
+    } else {
+      navigator.mediaDevices
+        .getUserMedia({ video: true, audio: false })
+        .then(function (stream) {
+          sfVideo.srcObject = stream;
+          sfVideo.play();
+        })
+        .catch(console.merror.bind(console));
     }
-
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: false })
-      .then(function (stream) {
-        sfVideo.srcObject = stream;
-        sfVideo.play();
-      })
-      .catch(console.merror.bind(console));
 
     sfVideo.addEventListener(
       'canplay',
